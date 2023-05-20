@@ -5,6 +5,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class CryptoCoinFetcherService {
 
 
@@ -21,10 +24,13 @@ public class CryptoCoinFetcherService {
     private static final String VS_CURRENCY = "usd";
     private static final String ORDER = "market_cap_desc";
     private static final boolean INCLUDE_SPARKLINE = false;
+    private static final String API_URL = "https://api.coingecko.com/api/v3/";
+    private static final String COIN_PRICE_ENDPOINT = "simple/price?ids=%s&vs_currencies=%s";
 
     private String apiUrl;
 
-    @Value("${coin.fetch.limit}") private int limit;
+    @Value("${coin.fetch.limit}")
+    private int limit;
 
     public CryptoCoinFetcherService() {
         // Default limit
@@ -41,7 +47,7 @@ public class CryptoCoinFetcherService {
         try {
             String jsonResponse = fetchApiResponse(apiUrl);
             JSONArray jsonArray = new JSONArray(jsonResponse);
-           return fetchAndReturnTopCryptocurrencies(jsonArray);
+            return fetchAndReturnTopCryptocurrencies(jsonArray);
         } catch (IOException e) {
             System.err.println("Error occurred while fetching the API response: " + e.getMessage());
         }
@@ -86,19 +92,31 @@ public class CryptoCoinFetcherService {
             JSONObject coinObj = jsonArray.getJSONObject(i);
             String coinName = coinObj.getString("name");
             String coinId = coinObj.getString("id");
-            cryptoCoins.add(new CryptoCoin(coinName,coinId));
+            cryptoCoins.add(new CryptoCoin(coinName, coinId));
         }
         return cryptoCoins;
     }
 
-    public static void main(String[] args) {
-        CryptoCoinFetcherService fetcher = new CryptoCoinFetcherService();
-        fetcher.setLimit(25); // Set the limit as desired
-        try {
-            fetcher.fetchTopCryptocurrencies();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Method to fetch crypto coin price
+     *
+     * @param cryptoSymbol
+     * @param currency
+     * @return
+     */
+    public double fetchCoinPrice(String cryptoSymbol, String currency) {
+
+        RestTemplate restTemplate = new RestTemplate();
+        String coinPriceEndpoint = String.format(COIN_PRICE_ENDPOINT, cryptoSymbol, currency);
+        String jsonResponse = restTemplate.getForObject(API_URL + coinPriceEndpoint, String.class);
+
+        JSONObject jsonObject = new JSONObject(jsonResponse);
+        JSONObject priceObject = jsonObject.getJSONObject(cryptoSymbol.toLowerCase());
+        double cryptoValue = priceObject.getDouble(currency.toLowerCase());
+
+        return cryptoValue;
+
+
     }
 
 }
