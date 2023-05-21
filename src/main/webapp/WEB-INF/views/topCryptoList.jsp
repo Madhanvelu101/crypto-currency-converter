@@ -6,6 +6,9 @@
         <head>
             <meta charset="UTF-8">
             <title>Top CryptoConverter</title>
+
+            <!-- Hyperlink to history.jsp -->
+                <p><a href="/history">View Conversion History</a></p>
             <style>
                 .form-container {
                     display: flex;
@@ -33,6 +36,13 @@
                     display: inline-block;
                     width: 120px;
                 }
+                .form-container input[type="submit"] {
+                            background-color: #4CAF50;
+                            color: white;
+                            padding: 8px 16px;
+                            border: none;
+                            cursor: pointer;
+                }
             </style>
         </head>
 
@@ -44,7 +54,7 @@
 
                 <form action="/getCryptoValue" method="POST">
                     <div class="form-row">
-                        <label for="cryptoSymbol">Crypto Symbol:</label>
+                        <label for="cryptoSymbol">Crypto Currency:</label>
                         <select name="cryptoSymbol" id="cryptoSymbol">
                             <c:forEach items="${cryptos}" var="crypto">
                                 <option value="${crypto.id}">${crypto.name} (${crypto.id})</option>
