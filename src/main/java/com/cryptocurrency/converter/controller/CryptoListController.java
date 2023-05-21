@@ -4,6 +4,7 @@ import com.cryptocurrency.converter.models.GeoLocation;
 import com.cryptocurrency.converter.models.CryptoCoin;
 
 import com.cryptocurrency.converter.service.CryptoCoinFetcherService;
+import com.cryptocurrency.converter.service.HistoryService;
 import com.cryptocurrency.converter.service.IPGeoLocationService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,17 @@ public class CryptoListController {
     @Autowired
     private CryptoCoinFetcherService cryptoCoinFetcher;
 
+
+    private HistoryService historyService;
+
     private static final String API_URL = "https://api.coingecko.com/api/v3/";
     private static final String COIN_PRICE_ENDPOINT = "simple/price?ids=%s&vs_currencies=%s";
 
     List<CryptoCoin> cryptos = new ArrayList<>();
+
+    public CryptoListController(HistoryService historyService) {
+        this.historyService = historyService;
+    }
 
     @GetMapping("/topCryptoList")
     public String topCryptoList(Model model) {
@@ -64,6 +72,9 @@ public class CryptoListController {
 
         //fetch currency symbol from Locale
         String currencySymbol = this.ipGeoLocationService.fetchCurrencySymbol(geoLocation);
+
+        //Log history to DB
+        this.historyService.logHistory("1001",cryptoSymbol,ipAddress,cryptoValue,geoLocation.getCountry());
 
         model.addAttribute("cryptos", this.cryptos);
         model.addAttribute("currencySymbol", currencySymbol);
