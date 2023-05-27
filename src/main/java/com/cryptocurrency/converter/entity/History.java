@@ -31,7 +31,7 @@ public class History {
     private String ipAddress;
 
     @Column(name = "crypto_price", nullable = false)
-    private double cryptoPrice;
+    private String cryptoPrice;
 
     @Column(name = "country", nullable = false)
     private String country;
