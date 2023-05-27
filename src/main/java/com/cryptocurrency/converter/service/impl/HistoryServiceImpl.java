@@ -15,9 +15,9 @@ public class HistoryServiceImpl implements HistoryService {
     HistoryRepository historyRepository;
 
     @Override
-    public void logHistory(String userId, String cryptoCoin, String ipAddress, double cryptoValue, String country) {
+    public void logHistory(Long userId, String cryptoCoin, String ipAddress, String cryptoValue, String country) {
         History history = new History();
-        history.setUserId(Long.valueOf(userId));
+        history.setUserId(userId);
         history.setCryptoCoin(cryptoCoin);
         history.setIpAddress(ipAddress);
         history.setCryptoPrice(cryptoValue);
@@ -29,5 +29,10 @@ public class HistoryServiceImpl implements HistoryService {
     @Override
     public List<History> getAllHistory() {
         return historyRepository.findAll();
+    }
+
+    @Override
+    public List<History> findHistoryByUserId(long userId) {
+        return historyRepository.findByUserId(userId);
     }
 }
