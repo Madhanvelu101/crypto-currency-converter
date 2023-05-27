@@ -27,13 +27,14 @@
                 color: white;
             }
         </style>
+        <%@ include file="navbar.jsp" %>
 </head>
 <body>
     <h2>Crypto Conversion History</h2>
     <table>
         <tr>
             <th>ID</th>
-            <th>User ID</th>
+
             <th>Crypto Coin</th>
             <th>IP Address</th>
             <th>Crypto Price</th>
@@ -43,7 +44,6 @@
         <c:forEach items="${historyList}" var="history">
             <tr>
                 <td>${history.id}</td>
-                <td>${history.userId}</td>
                 <td>${history.cryptoCoin}</td>
                 <td>${history.ipAddress}</td>
                 <td>${history.cryptoPrice}</td>
@@ -52,7 +52,6 @@
             </tr>
         </c:forEach>
     </table>
-     <!-- Hyperlink to topCryptoList.jsp -->
-        <p><a href="/topCryptoList">Back to Crypto Conversions</a></p>
+
 </body>
 </html>
