@@ -1,5 +1,6 @@
 package com.cryptocurrency.converter.service;
 
+import com.cryptocurrency.converter.exceptions.ConverterException;
 import com.cryptocurrency.converter.models.CryptoCoin;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -106,15 +107,19 @@ public class CryptoCoinFetcherService {
      */
     public double fetchCoinPrice(String cryptoSymbol, String currency) {
 
-        RestTemplate restTemplate = new RestTemplate();
-        String coinPriceEndpoint = String.format(COIN_PRICE_ENDPOINT, cryptoSymbol, currency);
-        String jsonResponse = restTemplate.getForObject(API_URL + coinPriceEndpoint, String.class);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String coinPriceEndpoint = String.format(COIN_PRICE_ENDPOINT, cryptoSymbol, currency);
+            String jsonResponse = restTemplate.getForObject(API_URL + coinPriceEndpoint, String.class);
 
-        JSONObject jsonObject = new JSONObject(jsonResponse);
-        JSONObject priceObject = jsonObject.getJSONObject(cryptoSymbol.toLowerCase());
-        double cryptoValue = priceObject.getDouble(currency.toLowerCase());
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONObject priceObject = jsonObject.getJSONObject(cryptoSymbol.toLowerCase());
+            double cryptoValue = priceObject.getDouble(currency.toLowerCase());
 
-        return cryptoValue;
+            return cryptoValue;
+        } catch (Exception e) {
+            throw new ConverterException("Error while fetching crypto price, Please try again");
+        }
 
 
     }

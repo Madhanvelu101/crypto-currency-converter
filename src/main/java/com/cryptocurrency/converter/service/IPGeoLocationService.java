@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
 
@@ -53,15 +54,17 @@ public class IPGeoLocationService {
     /**
      * To fetch currency symbol using Java Locale
      * @param geoLocation
+     * @param cryptoValue
      * @return
      */
-    public String fetchCurrencySymbol(GeoLocation geoLocation){
+    public String formatCurrenyAndSymbol(GeoLocation geoLocation, double cryptoValue){
 
         String language = geoLocation.getLanguage().substring(0,2);
         String countryCode = geoLocation.getCountryCode();
         Locale locale = new Locale(language,countryCode);
         Currency currency = Currency.getInstance(locale);
-        return currency.getSymbol(locale);
+        String currencyAndSymbol = NumberFormat.getCurrencyInstance(locale).format(cryptoValue);
+        return currencyAndSymbol;
     }
 
 }
