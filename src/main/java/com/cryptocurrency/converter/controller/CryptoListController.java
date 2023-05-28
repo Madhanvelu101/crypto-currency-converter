@@ -9,7 +9,10 @@ import com.cryptocurrency.converter.service.CryptoCoinFetcherService;
 import com.cryptocurrency.converter.service.HistoryService;
 import com.cryptocurrency.converter.service.IPGeoLocationService;
 import com.cryptocurrency.converter.service.UserService;
+import com.cryptocurrency.converter.service.impl.SecurityServiceImpl;
 import com.cryptocurrency.converter.utils.UserUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +38,10 @@ public class CryptoListController {
 
     private HistoryService historyService;
 
+    List<CryptoCoin> cryptos = new ArrayList<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(CryptoListController.class);
+
     @Autowired
     public CryptoListController(CryptoCoinFetcherService cryptoCoinFetcher, IPGeoLocationService ipGeoLocationService, UserService userService, UserUtils userUtils, HistoryService historyService) {
         this.cryptoCoinFetcher = cryptoCoinFetcher;
@@ -45,14 +52,9 @@ public class CryptoListController {
     }
 
 
-
-    private static final String API_URL = "https://api.coingecko.com/api/v3/";
-    private static final String COIN_PRICE_ENDPOINT = "simple/price?ids=%s&vs_currencies=%s";
-
-    List<CryptoCoin> cryptos = new ArrayList<>();
-
     @GetMapping("/converter")
     public String converter(Model model) throws ExecutionException {
+
 
         //Service to fetch top 25 Crypto coins, Comment this and hard-code in case of rate-limit
         cryptos = cryptoCoinFetcher.getTopCryptocurrencies();

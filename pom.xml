@@ -8,6 +8,7 @@
 		<version>2.7.12</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+	<packaging>war</packaging>
 	<groupId>com.cryptocurrency.converter</groupId>
 	<artifactId>crypto-currency-converter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -39,6 +40,11 @@
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
@@ -95,6 +101,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+						<finalName>crypto-converter</finalName>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
