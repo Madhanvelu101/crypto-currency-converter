@@ -28,7 +28,7 @@ public class HistoryServiceImpl implements HistoryService {
 
     @Override
     public List<History> getAllHistory() {
-        return historyRepository.findAll();
+        return (List<History>) historyRepository.findAll();
     }
 
     @Override

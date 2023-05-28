@@ -31,6 +31,11 @@ public class SecurityServiceImpl implements SecurityService {
         return null;
     }
 
+    /**
+     * Method to auto-login after registration, and create token and authenticate
+     * @param username
+     * @param password
+     */
     @Override
     public void autoLogin(String username, String password) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);

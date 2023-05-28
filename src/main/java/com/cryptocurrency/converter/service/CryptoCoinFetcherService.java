@@ -32,6 +32,8 @@ public class CryptoCoinFetcherService {
     private static final String API_URL = "https://api.coingecko.com/api/v3/";
     private static final String COIN_PRICE_ENDPOINT = "simple/price?ids=%s&vs_currencies=%s";
 
+    private RestTemplate restTemplate;
+
     private String apiUrl;
 
     @Value("${coin.fetch.limit}")
@@ -77,7 +79,7 @@ public class CryptoCoinFetcherService {
         return null;
     }
 
-    private String buildApiUrl() {
+    public String buildApiUrl() {
         StringBuilder sb = new StringBuilder(BASE_API_URL);
         sb.append("?vs_currency=").append(VS_CURRENCY);
         sb.append("&order=").append(ORDER);
@@ -87,7 +89,7 @@ public class CryptoCoinFetcherService {
         return sb.toString();
     }
 
-    private String fetchTopCryptos(String apiUrl) throws IOException {
+    protected String fetchTopCryptos(String apiUrl) throws IOException {
         URL url = new URL(apiUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -114,7 +116,7 @@ public class CryptoCoinFetcherService {
      * @return
      * @throws JSONException
      */
-    private List<CryptoCoin> computeCryptoList(JSONArray jsonArray) throws JSONException {
+    protected List<CryptoCoin> computeCryptoList(JSONArray jsonArray) throws JSONException {
         List<CryptoCoin> cryptoCoins = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject coinObj = jsonArray.getJSONObject(i);
@@ -152,6 +154,10 @@ public class CryptoCoinFetcherService {
         } catch (Exception e) {
             throw new ConverterException("Crypto Currency is unavailable for the given location. Please try with other location.");
         }
+    }
+
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 }
 

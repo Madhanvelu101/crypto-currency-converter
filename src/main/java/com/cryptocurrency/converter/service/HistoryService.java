@@ -7,7 +7,7 @@ import java.util.List;
 public interface HistoryService {
     void logHistory(Long userId, String cryptoSymbol, String ipAddress, String cryptoValue, String country);
 
-    List<History> getAllHistory();
+    Iterable<History> getAllHistory();
 
     List<History> findHistoryByUserId(long userId);
 }
