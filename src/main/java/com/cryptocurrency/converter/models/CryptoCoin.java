@@ -1,32 +1,16 @@
 package com.cryptocurrency.converter.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * To store crypto coin name and id
  */
+@Getter
+@Setter
+@AllArgsConstructor
 public class CryptoCoin {
     private String name;
     private String id;
-
-    public CryptoCoin(String name, String id) {
-        this.name = name;
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-
 }

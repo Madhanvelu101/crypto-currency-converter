@@ -2,9 +2,13 @@ package com.cryptocurrency.converter.service;
 
 import com.cryptocurrency.converter.exceptions.ConverterException;
 import com.cryptocurrency.converter.models.CryptoCoin;
+import com.cryptocurrency.converter.models.CryptoCurrency;
+import com.google.common.cache.LoadingCache;
+import lombok.NoArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,11 +20,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Service
+@NoArgsConstructor
 public class CryptoCoinFetcherService {
-
-
     private static final String BASE_API_URL = "https://api.coingecko.com/api/v3/coins/markets";
     private static final String VS_CURRENCY = "usd";
     private static final String ORDER = "market_cap_desc";
@@ -33,22 +37,40 @@ public class CryptoCoinFetcherService {
     @Value("${coin.fetch.limit}")
     private int limit;
 
-    public CryptoCoinFetcherService() {
-        // Default limit
-        this.limit = 25;
-        this.apiUrl = buildApiUrl();
+    private LoadingCache<Integer, List<CryptoCoin>> cryptoCoinCache;
 
+    private LoadingCache<CryptoCurrency, Double> cryptoPriceCache;
+
+    private void init() {
+        this.apiUrl = buildApiUrl();
     }
 
-    public void setLimit(int limit) {
-        this.limit = limit;
+    public void setCryptoPriceCache(LoadingCache<CryptoCurrency, Double> cryptoPriceCache) {
+        this.cryptoPriceCache = cryptoPriceCache;
+        init();
+    }
+
+
+    public void setCryptoCoinCache(LoadingCache<Integer, List<CryptoCoin>> cryptoCoinCache) {
+        this.cryptoCoinCache = cryptoCoinCache;
+        init();
+    }
+
+    /**
+     * Get List of top crypto coins list from cryptoCoinCache.
+     * @return
+     * @throws JSONException
+     * @throws ExecutionException
+     */
+    public List<CryptoCoin> getTopCryptocurrencies() throws JSONException, ExecutionException {
+        return cryptoCoinCache.get(limit);
     }
 
     public List<CryptoCoin> fetchTopCryptocurrencies() throws JSONException {
         try {
-            String jsonResponse = fetchApiResponse(apiUrl);
-            JSONArray jsonArray = new JSONArray(jsonResponse);
-            return fetchAndReturnTopCryptocurrencies(jsonArray);
+            String topCryptos = fetchTopCryptos(apiUrl);
+            JSONArray jsonArray = new JSONArray(topCryptos);
+            return computeCryptoList(jsonArray);
         } catch (IOException e) {
             System.err.println("Error occurred while fetching the API response: " + e.getMessage());
         }
@@ -65,7 +87,7 @@ public class CryptoCoinFetcherService {
         return sb.toString();
     }
 
-    private String fetchApiResponse(String apiUrl) throws IOException {
+    private String fetchTopCryptos(String apiUrl) throws IOException {
         URL url = new URL(apiUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -86,9 +108,14 @@ public class CryptoCoinFetcherService {
         }
     }
 
-    private List<CryptoCoin> fetchAndReturnTopCryptocurrencies(JSONArray jsonArray) throws JSONException {
-
-        List<CryptoCoin> cryptoCoins = new ArrayList<CryptoCoin>();
+    /**
+     * Method to init cryptoCoinCache, if there is a cache miss
+     * @param jsonArray
+     * @return
+     * @throws JSONException
+     */
+    private List<CryptoCoin> computeCryptoList(JSONArray jsonArray) throws JSONException {
+        List<CryptoCoin> cryptoCoins = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject coinObj = jsonArray.getJSONObject(i);
             String coinName = coinObj.getString("name");
@@ -99,29 +126,32 @@ public class CryptoCoinFetcherService {
     }
 
     /**
-     * Method to fetch crypto coin price
-     *
-     * @param cryptoSymbol
-     * @param currency
+     * Fetch coin price for the given location from cache
+     * @param cryptoCurrency
+     * @return
+     * @throws ExecutionException
+     */
+    public double fetchCoinPrice(CryptoCurrency cryptoCurrency) throws ExecutionException {
+        return this.cryptoPriceCache.get(cryptoCurrency);
+    }
+
+    /**
+     * Method to init coin coinPriceCache, if there is a cache miss
+     * @param cryptoCurrency
      * @return
      */
-    public double fetchCoinPrice(String cryptoSymbol, String currency) {
-
+    public double computeCoinPrice(CryptoCurrency cryptoCurrency) {
         try {
             RestTemplate restTemplate = new RestTemplate();
-            String coinPriceEndpoint = String.format(COIN_PRICE_ENDPOINT, cryptoSymbol, currency);
+            String coinPriceEndpoint = String.format(COIN_PRICE_ENDPOINT, cryptoCurrency.getCryptoSymbol(), cryptoCurrency.getCurrencyCode());
             String jsonResponse = restTemplate.getForObject(API_URL + coinPriceEndpoint, String.class);
 
             JSONObject jsonObject = new JSONObject(jsonResponse);
-            JSONObject priceObject = jsonObject.getJSONObject(cryptoSymbol.toLowerCase());
-            double cryptoValue = priceObject.getDouble(currency.toLowerCase());
-
-            return cryptoValue;
+            JSONObject priceObject = jsonObject.getJSONObject(cryptoCurrency.getCryptoSymbol().toLowerCase());
+            return priceObject.getDouble(cryptoCurrency.getCurrencyCode().toLowerCase());
         } catch (Exception e) {
-            throw new ConverterException("Error while fetching crypto price, Please try again");
+            throw new ConverterException("Crypto Currency is unavailable for the given location. Please try with other location.");
         }
-
-
     }
-
 }
+

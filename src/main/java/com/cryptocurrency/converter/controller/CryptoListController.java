@@ -1,6 +1,7 @@
 package com.cryptocurrency.converter.controller;
 
 import com.cryptocurrency.converter.entity.User;
+import com.cryptocurrency.converter.models.CryptoCurrency;
 import com.cryptocurrency.converter.models.GeoLocation;
 import com.cryptocurrency.converter.models.CryptoCoin;
 
@@ -19,37 +20,42 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 public class CryptoListController {
-    @Autowired
-    private IPGeoLocationService ipGeoLocationService;
 
-    @Autowired
     private CryptoCoinFetcherService cryptoCoinFetcher;
 
-    @Autowired
+    private IPGeoLocationService ipGeoLocationService;
+
     private UserService userService;
 
-    @Autowired
     private UserUtils userUtils;
 
     private HistoryService historyService;
+
+    @Autowired
+    public CryptoListController(CryptoCoinFetcherService cryptoCoinFetcher, IPGeoLocationService ipGeoLocationService, UserService userService, UserUtils userUtils, HistoryService historyService) {
+        this.cryptoCoinFetcher = cryptoCoinFetcher;
+        this.ipGeoLocationService = ipGeoLocationService;
+        this.userService = userService;
+        this.userUtils = userUtils;
+        this.historyService = historyService;
+    }
+
+
 
     private static final String API_URL = "https://api.coingecko.com/api/v3/";
     private static final String COIN_PRICE_ENDPOINT = "simple/price?ids=%s&vs_currencies=%s";
 
     List<CryptoCoin> cryptos = new ArrayList<>();
 
-    public CryptoListController(HistoryService historyService) {
-        this.historyService = historyService;
-    }
-
     @GetMapping("/converter")
-    public String converter(Model model) {
+    public String converter(Model model) throws ExecutionException {
 
         //Service to fetch top 25 Crypto coins, Comment this and hard-code in case of rate-limit
-        cryptos = cryptoCoinFetcher.fetchTopCryptocurrencies();
+        cryptos = cryptoCoinFetcher.getTopCryptocurrencies();
 
 //        cryptos.add(new CryptoCoin("Bitcoin", "bitcoin"));
 //        cryptos.add(new CryptoCoin("Ethereum", "ethereum"));
@@ -69,11 +75,11 @@ public class CryptoListController {
             geoLocation = ipGeoLocationService.fetchGeoLocationByIp(ipAddress);
 
             //fetch currency from computed object
-            String currency = geoLocation.getCurrency();
+            String currencyCode = geoLocation.getCurrency();
 
 
             //fetch crypto coin price from API
-            double cryptoValue = this.cryptoCoinFetcher.fetchCoinPrice(cryptoSymbol, currency);
+            double cryptoValue = this.cryptoCoinFetcher.fetchCoinPrice(new CryptoCurrency(cryptoSymbol, currencyCode));
 
             //fetch currency symbol from Locale
             formattedCurrencyAndSymbol = this.ipGeoLocationService.formatCurrenyAndSymbol(geoLocation, cryptoValue);
