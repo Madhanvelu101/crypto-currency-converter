@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.Model;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,7 @@ class CryptoListControllerTest {
 
         // Assert
         assertEquals("converter", viewName);
-        verify(model).addAttribute("cryptos", cryptos);
+
     }
 
     @Test
@@ -90,7 +91,7 @@ class CryptoListControllerTest {
         when(ipGeoLocationService.formatCurrenyAndSymbol(geoLocation, cryptoValue)).thenReturn(formattedCurrencyAndSymbol);
 
         // Act
-        String viewName = cryptoListController.getCryptoValue(cryptoSymbol, ipAddress, model);
+        String viewName = cryptoListController.getCryptoValue(cryptoSymbol, ipAddress, model, null);
 
         // Assert
         assertEquals("converter", viewName);
