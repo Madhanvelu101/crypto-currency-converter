@@ -28,7 +28,17 @@
                         <label for="cryptoSymbol">Crypto Currency:</label>
                         <select name="cryptoSymbol" id="cryptoSymbol" class = "form-control">
                             <c:forEach items="${cryptos}" var="crypto">
-                                <option value="${crypto.id}">${crypto.name} (${crypto.id})</option>
+
+                                    <c:choose>
+                                        <c:when test="${crypto.id eq selectedCrypto}">
+                                            <option value="${crypto.id}" selected="selected">${crypto.id}</option>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <option value="${crypto.id}">${crypto.id}</option>
+                                        </c:otherwise>
+                                    </c:choose>
+
+
                             </c:forEach>
                         </select>
                         <div>
@@ -36,7 +46,7 @@
 
                             <div class="form-row">
                                 <label for="ipAddress">IP Address:</label>
-                                <input type="text" name="ipAddress" id="ipAddress" class = "form-control">
+                                <input type="text" placeholder="Optional" name="ipAddress" value="${ipAddress}" id="ipAddress" class = "form-control">
                             </div>
 
                             <div class="form-row">
