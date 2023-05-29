@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,8 @@ public class CryptoCoinFetcherService {
     private static final boolean INCLUDE_SPARKLINE = false;
     private static final String API_URL = "https://api.coingecko.com/api/v3/";
     private static final String COIN_PRICE_ENDPOINT = "simple/price?ids=%s&vs_currencies=%s";
+
+    private static final Logger logger = LoggerFactory.getLogger(IPGeoLocationService.class);
 
     private RestTemplate restTemplate;
 
@@ -60,12 +64,21 @@ public class CryptoCoinFetcherService {
 
     /**
      * Get List of top crypto coins list from cryptoCoinCache.
+     *
      * @return
      * @throws JSONException
      * @throws ExecutionException
      */
     public List<CryptoCoin> getTopCryptocurrencies() throws JSONException, ExecutionException {
-        return cryptoCoinCache.get(limit);
+        List<CryptoCoin> cryptoCoins = cryptoCoinCache.get(limit);
+        //Hard code coins if API returns empty list. Due to API rate limiting.
+        if (cryptoCoins.isEmpty()) {
+            logger.debug("Fetch TopCryptocurrencies returned Null due to rate limitter. Hence return hard codeed value");
+            cryptoCoins.add(new CryptoCoin("Bitcoin", "bitcoin"));
+            cryptoCoins.add(new CryptoCoin("Ethereum", "ethereum"));
+            cryptoCoins.add(new CryptoCoin("Ripple", "XRP"));
+        }
+        return cryptoCoins;
     }
 
     public List<CryptoCoin> fetchTopCryptocurrencies() throws JSONException {
@@ -112,6 +125,7 @@ public class CryptoCoinFetcherService {
 
     /**
      * Method to init cryptoCoinCache, if there is a cache miss
+     *
      * @param jsonArray
      * @return
      * @throws JSONException
@@ -129,6 +143,7 @@ public class CryptoCoinFetcherService {
 
     /**
      * Fetch coin price for the given location from cache
+     *
      * @param cryptoCurrency
      * @return
      * @throws ExecutionException
@@ -139,11 +154,13 @@ public class CryptoCoinFetcherService {
 
     /**
      * Method to init coin coinPriceCache, if there is a cache miss
+     *
      * @param cryptoCurrency
      * @return
      */
     public double computeCoinPrice(CryptoCurrency cryptoCurrency) {
         try {
+            logger.debug("ComputeCoinPrice from API");
             RestTemplate restTemplate = new RestTemplate();
             String coinPriceEndpoint = String.format(COIN_PRICE_ENDPOINT, cryptoCurrency.getCryptoSymbol(), cryptoCurrency.getCurrencyCode());
             String jsonResponse = restTemplate.getForObject(API_URL + coinPriceEndpoint, String.class);
@@ -152,10 +169,15 @@ public class CryptoCoinFetcherService {
             JSONObject priceObject = jsonObject.getJSONObject(cryptoCurrency.getCryptoSymbol().toLowerCase());
             return priceObject.getDouble(cryptoCurrency.getCurrencyCode().toLowerCase());
         } catch (Exception e) {
+            logger.error("Exception occured while computeCoinPrice {}", e.getMessage());
             throw new ConverterException("Crypto Currency is unavailable for the given location. Please try with other location.");
         }
     }
 
+    /**
+     * Method used only for testing
+     * @param restTemplate
+     */
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
