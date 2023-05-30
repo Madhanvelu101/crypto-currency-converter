@@ -11,6 +11,7 @@ import com.cryptocurrency.converter.service.IPGeoLocationService;
 import com.cryptocurrency.converter.service.UserService;
 import com.cryptocurrency.converter.service.impl.SecurityServiceImpl;
 import com.cryptocurrency.converter.utils.UserUtils;
+import com.google.common.net.InetAddresses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,13 +70,16 @@ public class CryptoListController {
 
     @PostMapping("/converter")
     public String getCryptoValue(@RequestParam("cryptoSymbol") String cryptoSymbol, @RequestParam(value = "ipAddress", required = false, defaultValue = "0.0.0.0") String ipAddress, Model model, HttpServletRequest request) {
+        logger.debug("Post call for conversion ipAddress : {}, cryptoCoin : {} ", ipAddress, cryptoSymbol);
         String formattedCurrencyAndSymbol = null;
         User user = userService.findByUsername(userUtils.getLoggedInUsername());
-        logger.debug("Post call for conversion ipAddress : {}, cryptoCoin : {} ", ipAddress, cryptoSymbol);
-        if (ipAddress.equals(defaultIpAddress)) {
+
+        //validate if it is equals to default address, or in proper IP format
+        if (ipAddress.equals(defaultIpAddress) || !InetAddresses.isInetAddress(ipAddress)) {
             ipAddress = request.getRemoteAddr();
             logger.debug("Setting IPAddress from request: {} ", ipAddress);
         }
+
         //Get currency from IP Address
         GeoLocation geoLocation = null;
         try {
