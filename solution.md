@@ -68,6 +68,48 @@ CICD pipeline is setup on jenkins.
 2. Click on "Build Now" to trigger the pipeline.
 
 
+#### Jenkins Configuration.
 
 ![Jenkins Configuration](src/main/resources/images/jenkins_configuration.png)
+
+#### Jenkins Dashboard.
+
+![Jenkins Dashboard](src/main/resources/images/jenkins_dashboard.png)
+
+#### Flow Diagram.
+![Flow Diagram](src/main/resources/images/flow_diagram.png)
+
+### App Setup
+
+#### Registration 
+
+Create an account using http://localhost:8080/registration
+
+![Registration](src/main/resources/images/create_account.png)
+
+
+#### Login
+Once account is created. It will auto-login to the Crypto Converter App.
+
+If not logged-in, then use http://localhost:8080/login to login to app.
+![Login](src/main/resources/images/login.png)
+
+#### Converter
+Select any crypto currency from the drop down _(Drop down has top 25 cryptos based on market value are fetched from API)._
+
+Provide an IpAddress in the textbox and click **Submit**. 
+1. If IpAddress is provided, it will fetch the price of selected crypto in the localized format(Ex. For US IpAddress, Currency will be in $.)
+2. If IpAddress is not provided, it will fetch Ip from Request and convert the currency.
+
+
+![Registration](src/main/resources/images/crypto_converter.png)
+
+#### History
+
+Upon clicking the History option on top right corner. It will list the history of the conversions for that logged in user.
+![History](src/main/resources/images/history.png)
+
+
+
+
 

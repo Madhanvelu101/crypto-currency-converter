@@ -7,7 +7,7 @@
 
          <%@ include file="navbar.jsp" %>
             <meta charset="UTF-8">
-            <title>Top CryptoConverter</title>
+            <title>CryptoConverter</title>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
             <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/common.css">

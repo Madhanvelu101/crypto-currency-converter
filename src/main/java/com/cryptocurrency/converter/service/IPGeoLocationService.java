@@ -83,31 +83,32 @@ public class IPGeoLocationService {
      * @return
      */
     private GeoLocation getDefaultLocaleGeo() {
-        String currencyCode, countryCode, language;
+        String currencyCode = null, language = null, countryName = null, countryCode = null;
         Locale defaultLocale = Locale.getDefault();
         logger.debug("Default locale country {}", defaultLocale.getCountry());
+
         try {
             Currency currency = java.util.Currency.getInstance(new Locale("", defaultLocale.getCountry()));
             currencyCode = currency.getCurrencyCode();
             countryCode = defaultLocale.getCountry();
             language = defaultLocale.getLanguage();
+            countryName = defaultLocale.getDisplayName();
         } catch (IllegalArgumentException e) {
             logger.error("IllegalArgumentException, so handling with default case");
-            countryCode = "DE";
-            currencyCode = "EUR";
-            language = "de";
         }
+
         if (countryCode == null || countryCode.isEmpty()) {
             //Hard coded country and currency, because Locale not working in dockers
             logger.debug("CountryCode is null, so setting default values");
             countryCode = "DE";
             currencyCode = "EUR";
             language = "de";
+            countryName = "Germany";
             logger.debug("Ip address not provided so setting default Locale currencyCode : {}, countryCode : {} ", countryCode, currencyCode);
         }
 
         return GeoLocation.builder().city("defaultCity")
-                .country(defaultLocale.getDisplayCountry())
+                .country(countryName)
                 .countryCode(countryCode)
                 .language(language)
                 .currency(currencyCode).build();
